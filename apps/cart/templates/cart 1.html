@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %} Cart | {% endblock %}
+
+
+{% block content %}
+<div id="cartPage">
+
+  <h1 class="title">Cart</h1>
+  
+  <div class="table" v-if="products.length > 0">
+    <table>
+      <thead>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Price</th>
+      </thead>
+
+      <tbody>
+        <tr v-for="product in products">
+          <td>[[ product.title ]]</td>
+          <td>[[ product.quantity ]] 
+            <button @click="incrementQuantity(product.id, product.quantity, product.price)">+</button>
+            <button @click="decrementQuantity(product.id, product.quantity, product.price)">-</button></td>
+          <td>[[ product.total_price ]]</td>
+          <td><button @click="removeProduct(product.id )">Remove</button></td>
+        </tr>
+      </tbody>
+
+      <tfoot>
+        <tr>
+          <td>Total Cost:</td>
+          <td> [[ numItems ]]</td>
+          <td></td>
+          <td>{{ cart.get_total_cost }}</td>
+        </tr>
+
+        <tr v-if="coupon_value">
+          <td colspan="3">Total cost with coupon:</td>
+          <td>[[ totalCostWithCoupon ]]</td>
+        </tr>
+      </tfoot>
+
+    </table>
+
+    <div>
+      <hr>
+      coupon code:
+      <input type="text" v-model="coupon_code"><br>
+      <input type="hidden" v-model="coupon_value"><br>
+      <button @click="applyCoupon">Apply</button>
+      <hr>
+    </div>
+
+    <!-- ********* Form with 'VueJs' ********** -->
+    <!--  -->
+    <form v-on:submit.prevent="buy()">
+
+      <div class="field">
+        <div class="control">
+          <label>First Name</label>
+          <input type="text" name="first_name" v-model="first_name" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <label>Last Name</label>
+          <input type="text" name="last_name" v-model="last_name" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <label>Email</label>
+          <input type="text" name="email" v-model="email" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <label>Address</label>
+          <input type="text" name="address" v-model="address" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <label>Zipcode</label>
+          <input type="text" name="zipcode" v-model="zipcode" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <label>Place</label>
+          <input type="text" name="place" v-model="place" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="control">
+          <button class="button is-primary">Check Out</button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+  
+  <p v-else>Your Cart is empty</p>
+
+  <div v-if="errors.length > 0">
+    <article class="message is-danger" v-for="error in errors">
+      <div class="message-header">
+        <p>Error</p>
+        <button class="delete" aria-label="delete"></button>
+      </div>
+      <div class="message-body">
+        <strong>[[ error ]]</strong>
+      </div>
+    </article>
+  </div>
+
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Importing "Stripe.js" for for stripe integration -->
+<script type="application/javascript" src="https://js.stripe.com/v3/">
+</script>
+
+<script>
+  var productapp = new Vue({
+
+      el: '#cartPage',
+      delimiters: ['[[', ']]'],
+      store:store,
+
+      data() {
+        return {
+          errors: [],
+          first_name: '',
+          last_name: '',
+          email: '',
+          address: '',
+          zipcode: '',
+          place: '',
+          products: [{{ productstring|safe }}],
+          coupon_code: '',
+          coupon_value: ''
+        }
+      },
+
+      computed: {
+        numItems:function() {
+          return store.state.numItems
+        },
+
+        totalCost: function() {
+          return store.state.totalCost
+        },
+
+        totalCostWithCoupon: function() {
+          if (this.coupon_value > 0) {
+            let percent = parseFloat(this.coupon_value/100);
+            return store.state.totalCost * percent;
+          } else {
+            return store.state.totalCost;
+          }
+        },
+
+      },
+
+
+      methods: {
+        applyCoupon(){
+          if (this.coupon_code !== ''){
+            fetch('/api/can_use/?coupon_code=' + this.coupon_code,{
+              method: 'GET'
+            })
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              if (data.amount){
+                this.coupon_value = parseInt(data.amount)
+              } else {
+                this.coupon_value = 0
+              }
+            });
+
+          }
+        },
+
+        buy() {
+          var data = {
+            'first_name': this.first_name,
+            'last_name': this.last_name,
+            'email': this.email,
+            'address': this.address,
+            'zipcode': this.zipcode,
+            'place': this.place,
+            'coupon_code': this.coupon_code
+          };
+
+          //for displaying errors
+          this.errors = [];
+
+          var stripe = Stripe('{{ pub_key }}');
+          
+          fetch('/api/create_checkout_session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            credentials: 'same-origin',
+            
+            //converts JS object/dict into string
+            body: JSON.stringify(data)
+          })
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(session) {
+            return stripe.redirectToCheckout({sessionId: session.id})
+          })
+          .then(function(result) {
+            if (result.error) {
+              alert(result.error.message)
+            }
+          })
+          .catch(function(error){
+            console.log('Error: ', error);
+          });
+        },
+
+
+        incrementQuantity(product_id, quantity, price) {
+          var data = {
+            'product_id': product_id,
+            'update': true,
+            'quantity': parseInt(quantity) + 1
+          };
+
+          //Use of 'Vuex'
+          store.commit('increment', 1);
+          store.commit('changeTotalCost', parseFloat(price));
+
+          //can also use axios
+          fetch('/api/add_to_cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(data)
+          })
+          .then((response) => {
+            console.log(response)
+
+            for (var i=0; i<this.products.length; i++) {
+              var product = this.products[i];
+
+              if (product.id === product_id) {
+                this.products[i].quantity = parseInt(this.products[i].quantity) + 1;
+                this.products[i].total_price = parseInt(this.products[i].quantity) * parseFloat(this.products[i].price)
+              }
+            }
+          })
+          .catch(function (error) {
+            console.log('Error 2');
+            console.log(error);
+          })
+
+        },
+
+        decrementQuantity(product_id, quantity, price) {
+          var data = {
+            'product_id': product_id,
+            'update': true,
+            'quantity': parseInt(quantity) - 1
+          };
+
+          //Use of 'Vuex'
+          store.commit('increment', -1);
+          store.commit('changeTotalCost', -parseFloat(price));
+
+          //Checks to see if quantity is set to 0
+          if (data['quantity'] === 0) {
+            this.removeProduct(product_id);
+          } else {
+
+            //can also use axios
+          fetch('/api/add_to_cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(data)
+          })
+          .then((response) => {
+            console.log(response)
+
+            for (var i=0; i<this.products.length; i++) {
+              var product = this.products[i];
+
+              if (product.id === product_id) {
+                this.products[i].quantity = parseInt(this.products[i].quantity) - 1;
+                this.products[i].total_price = parseInt(this.products[i].quantity) * parseFloat(this.products[i].price)
+              }
+            }
+          })
+          .catch(function (error) {
+            console.log('Error 2');
+            console.log(error);
+          })
+
+          }
+
+        },
+
+        removeProduct(product_id) {
+          var data = {
+            'product_id': product_id, 
+          };
+
+          fetch('/api/remove_from_cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(data)
+          })
+          .then((response) => {
+            console.log(response)
+            console.log(product_id)
+            this.products = this.products.filter(product => product.id !== product_id)
+            //console.log(this.products)
+          })
+          
+          .catch(function (error) {
+            console.log('Error 2');
+            console.log(error);
+          })
+        }
+      },
+});
+</script>
+{% endblock %}

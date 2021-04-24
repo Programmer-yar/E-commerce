@@ -1,0 +1,20 @@
+--------------------------------------------------
+<=><===========> Ecommerce Store <=============><=>
+--------------------------------------------------
+--> Fearures:
+  - Categories
+    -> Automatically loading categories in 'base.html' menu using context 
+       processors
+    -> Manual ordering of categories
+    -> slug field
+
+  - Products
+    -> Ordering by date and time
+    -> Featured product option
+    -> slug field
+
+  - API calling to backend using 'Vuejs'
+    -> 'Vuex' to store global state which can be accessed by every 'vue'
+    component
+    
+  - Forms with 'Vuejs'

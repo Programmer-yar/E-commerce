@@ -1,0 +1,9 @@
+1) => "context_processors.py"
+   defined a function named "menu_categories" and then registered it in
+   "settings.py" -> 'TEMPLATES' -> 'OPTIONS' -> 'context_processors'
+
+   and then load the function output in 'base.html' to automatically load it
+   without any "views.py" function
+--------------------------------------------------------------------------
+2) "Ordering" in Meta:
+   Order the item by an integer field

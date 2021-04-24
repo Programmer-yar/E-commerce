@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %}Ecom site</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+  <!-- Font awwesome css -->
+  <link rel="stylesheet" href="{% static 'Core_app/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+
+  <!-- custom css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'Core_app/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'Core_app/default.css' %}">
+
+</head>
+
+<body>
+
+  <div id="main">
+
+    <div v-if="preLoadFlag" class="preloader">
+      <div class="preloader-inner">
+        <div class="preloader-icon">
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand mr-4" href="{% url 'frontpage' %}"><img src="{% static 'Core_app/images/logo2.png' %}"></a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarToggle">
+
+            <div class="navbar-nav mr-auto">
+              <a class="nav-item nav-link active" href="{% url 'frontpage' %}">Home</a>
+
+              <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Categories</a>
+                <div class="dropdown-menu">
+                  <!-- loaded from "context_processors.py" function after registering it in "settings.py" see Notes -->
+                  {% for category in menu_categories %}
+                    <a class="dropdown-item" href="{% url 'category_detail' category.slug %}" class="navbar-item">{{ category.title }}</a>
+                  {% endfor %}
+                </div>
+              </div>
+              <a class="nav-item nav-link" href="#">All Products</a>
+              <a class="nav-item nav-link" href="{% url 'contact' %}">Contact Us</a>
+
+            </div>
+
+            <!--Navbar Right Side -->
+            <div class="navbar-nav">
+              <a class="nav-item nav-link" href="{% url 'cart' %}"><i class="fa fa-shopping-cart fa-2x" aria-hidden="true"></i><span class="badge badge-danger">[[ numItems ]]</span></a>
+
+              <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user-circle-o fa-2x" aria-hidden="true"></i></a>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="#"><i class="fa fa-user" aria-hidden="true"></i> Account</a>
+                  <a class="dropdown-item" href="#"><i class="fa fa-heart-o" aria-hidden="true"></i> WishList</a>
+                  <a class="dropdown-item" href="#"><i class="fa fa-th-large" aria-hidden="true"></i> Orders</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#"><i class="fa fa-sign-out" aria-hidden="true"></i> Sign Out</a>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+  </div>
+
+  <section class="my-5">
+    {% block content %}
+    
+    {% endblock %}
+  </section>
+
+  <section class="shop-newsletter section mb-5">
+    <div class="container">
+      <div class="inner-top">
+        <div class="row">
+          <div class="col-lg-8 offset-lg-2 col-12">
+            <!-- Start Newsletter Inner -->
+            <div class="inner">
+              <h4>Newsletter</h4>
+              <p> Subscribe to our newsletter and get <span>10%</span> off your first purchase</p>
+              <form action="mail/mail.php" method="get" target="_blank" class="newsletter-inner">
+                <input name="EMAIL" placeholder="Your email address" required="" type="email">
+                <button class="btn">Subscribe</button>
+              </form>
+            </div>
+            <!-- End Newsletter Inner -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <!-- Footer Top -->
+    <div class="footer-top section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-5 col-md-6 col-12">
+            <!-- Single Widget -->
+            <div class="single-footer about">
+              <div class="logo">
+                <a href="index.html"><img src="{% static 'Core_app/images/logo2.png' %}" alt="#"></a>
+              </div>
+              <p class="text">Praesent dapibus, neque id cursus ucibus, tortor neque egestas augue,  magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.</p>
+              <p class="call">Got Question? Call us 24/7<span><a href="tel:123456789">+0123 456 789</a></span></p>
+            </div>
+            <!-- End Single Widget -->
+          </div>
+          <div class="col-lg-2 col-md-6 col-12">
+            <!-- Single Widget -->
+            <div class="single-footer links">
+              <h4>Information</h4>
+              <ul>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="#">Faq</a></li>
+                <li><a href="#">Terms & Conditions</a></li>
+                <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                <li><a href="#">Help</a></li>
+              </ul>
+            </div>
+            <!-- End Single Widget -->
+          </div>
+          <div class="col-lg-2 col-md-6 col-12">
+            <!-- Single Widget -->
+            <div class="single-footer links">
+              <h4>Customer Service</h4>
+              <ul>
+                <li><a href="#">Payment Methods</a></li>
+                <li><a href="#">Money-back</a></li>
+                <li><a href="#">Returns</a></li>
+                <li><a href="#">Shipping</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+              </ul>
+            </div>
+            <!-- End Single Widget -->
+          </div>
+          <div class="col-lg-3 col-md-6 col-12">
+            <!-- Single Widget -->
+            <div class="single-footer social">
+              <h4>Get In Tuch</h4>
+              <!-- Single Widget -->
+              <div class="contact">
+                <ul>
+                  <li>NO. 342 - London Oxford Street.</li>
+                  <li>012 United Kingdom.</li>
+                  <li>info@eshop.com</li>
+                  <li>+032 3456 7890</li>
+                </ul>
+              </div>
+              <!-- End Single Widget -->
+              <ul>
+                <li><a href="#"><i class="fa fa-facebook-official"aria-hidden="true"></i></a></li>
+                <li><a href="#"><i class="fa fa-twitter-square" aria-hidden="true"></i></a></li>
+                <li><a href="#"><i class="fa fa-flickr" aria-hidden="true"></i></a></li>
+                <li><a href="#"><i class="fa fa-instagram" aria-hidden="true"></i></a></li>
+              </ul>
+            </div>
+            <!-- End Single Widget -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Footer Top -->
+    <div class="copyright">
+      <div class="container">
+        <div class="inner">
+          <div class="row">
+            <div class="col-lg-6 col-12">
+              <div class="left">
+                <p>Copyright © 2021 <a href="#" target="_blank">Ahmad Yar</a>  -  All Rights Reserved.</p>
+              </div>
+            </div>
+            <div class="col-lg-6 col-12">
+              <div class="right">
+                <img src="{% static 'Core_app/images/payments.png' %}" alt="#">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  
+
+
+  <!-- loading Jquery and bootstrap files -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+
+  <!-- Including vue js --> 
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuex@3.6.0/dist/vuex.js"></script>
+  <script>
+    var store = new Vuex.Store({
+      state: {
+        //loading from apps.cart.context_processors.py
+        numItems: {{ cart.get_total_length }}, 
+        totalCost: {{ cart.get_total_cost }}
+        //cart is not rendered here
+      },
+
+      mutations: {
+        increment(state, quantity) {
+          state.numItems += quantity;
+        },
+
+        changeTotalCost(state, newCost) {
+          state.totalCost += newCost
+        }
+      },
+    });
+
+    var navbarapp = new Vue({
+      el: '#main',
+      delimiters: ['[[', ']]'],
+      store:store,  //accessing 'store' variable from above
+
+      computed:{
+        numItems: function() {
+          return store.state.numItems
+        }
+      },
+
+      data: {
+          preLoadFlag: true,
+        },
+
+      mounted() {
+        this.preLoadFlag = false;
+      },
+      
+    });
+  </script>
+
+  {% block scripts %}
+
+  {% endblock %}
+
+
+</body>
+
+</html>

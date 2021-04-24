@@ -1,0 +1,7 @@
+ecom_env/
+__pycache__/
+User data.txt
+Notes.txt
+Notes 2.txt
+Required Improvements.txt
+*.sqlite3

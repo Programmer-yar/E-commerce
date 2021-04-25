@@ -85,7 +85,7 @@
     <h3>Trending Items</h3>
   </div>
 
-  <div class="container mb-5">
+  <div id="front" class="container mb-5">
     <div class="row">
 
       {% for product in products %}
@@ -100,7 +100,7 @@
                 <dd class="col-5"><!-- <del class="text-muted">$20</del> -->
                  <strong>${{ product.price }}</strong></dd>
               </dl>
-              <button class="btn btn-sm"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Add to Cart</button>
+              <button class="btn btn-sm" @click="addToCart({{ product.id }})"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Add to Cart</button>
               <span><i class="fa fa-heart-o" aria-hidden="true"></i></span>
             </div>
           </div>
@@ -155,5 +155,46 @@
 {% endblock %}
 
 {% block scripts %}
-  
+  <script>
+    var frontpage = new Vue({
+      el: '#front',
+      store: store,
+
+      //see 'notes' for more info on delimeters
+      delimiters: ['[[', ']]'],
+      methods: {
+        addToCart(product_id){
+          console.log('product_id:', product_id);
+
+          var data = {
+            'product_id': product_id,
+            'update': false,
+            'quantity': 1
+          };
+
+          //can also use axios
+          fetch('/api/add_to_cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(data)
+          })
+          .then((response) => {
+            console.log(response);
+            //Using Vuex
+            store.commit('increment', 1);
+          })
+          .catch(function (error) {
+            console.log('Error 2');
+            console.log(error);
+          })
+
+        },
+      }
+
+    })
+  </script>
 {% endblock %}

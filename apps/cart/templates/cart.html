@@ -4,12 +4,12 @@
 
 
 {% block content %}
-  <div id="cartPage">
-    <h1 class="title">Cart</h1>
+  <div id="cartPage" class="mt-5">
+    
 
     <!-- Shopping Cart -->
     <div class="shopping-cart section">
-      <div class="container">
+      <div class="container" v-if="products.length > 0">
         <div class="row">
           <div class="col-12">
             <!-- Shopping Summery -->
@@ -21,7 +21,7 @@
                   <th class="text-center">UNIT PRICE</th>
                   <th class="text-center">QUANTITY</th>
                   <th class="text-center">TOTAL</th> 
-                  <th class="text-center"><i class="ti-trash remove-icon"></i></th>
+                  <th class="text-center"><i class="fa fa-trash"></i></th>
                 </tr>
               </thead>
               <tbody>
@@ -35,7 +35,7 @@
                   <td class="qty" data-title="Qty"><!-- Input Order -->
                     <div class="input-group">
                       <div class="button minus">
-                        <button type="button" class="btn btn-primary btn-number" disabled="disabled"
+                        <button type="button" class="btn btn-primary btn-number" :disabled="product.quantity == 1"
                         @click="decrementQuantity(product.id, product.quantity, product.price)"><i class="fa fa-minus"></i>
                         </button>
                       </div>
@@ -50,7 +50,7 @@
                     <!--/ End Input Order -->
                   </td>
                   <td class="total-amount" data-title="Total"><span>[[ product.total_price ]]</span></td>
-                  <td class="action" data-title="Remove"><a href="#"><i class="ti-trash remove-icon"></i></a></td>
+                  <td class="action" data-title="Remove"><a href="" @click="removeProduct(product.id)"><i class="fa fa-times"></i></a></td>
                 </tr>
               </tbody>
             </table>
@@ -65,23 +65,24 @@
                 <div class="col-lg-8 col-md-5 col-12">
                   <div class="left">
                     <div class="coupon">
-                      <form action="#" target="_blank">
-                        <input name="Coupon" placeholder="Enter Your Coupon">
-                        <button class="btn">Apply</button>
-                      </form>
+                      
+                      <input name="Coupon" placeholder="Enter Your Coupon" v-model="coupon_code">
+                      <input type="hidden" v-model="coupon_value">
+                      <button class="btn">Apply</button>
+                      
                     </div>
-                    <div class="checkbox">
+                    <!-- <div class="checkbox">
                       <label class="checkbox-inline" for="2"><input name="news" id="2" type="checkbox"> Shipping (+10$)</label>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
                 <div class="col-lg-4 col-md-7 col-12">
                   <div class="right">
                     <ul>
-                      <li>Cart Subtotal<span>$330.00</span></li>
+                      <li>Cart Subtotal<span>${{ cart.get_total_cost }}</span></li>
                       <li>Shipping<span>Free</span></li>
-                      <li>You Save<span>$20.00</span></li>
-                      <li class="last">You Pay<span>$310.00</span></li>
+                      <!-- <li>You Save<span>$20.00</span></li> -->
+                      <li class="last">You Pay<span>$[[ totalCostWithCoupon ]]</span></li>
                     </ul>
                     <div class="button5">
                       <a href="#" class="btn">Checkout</a>
@@ -94,6 +95,9 @@
             <!--/ End Total Amount -->
           </div>
         </div>
+      </div>
+      <div class="container" v-else>
+        <h3>No Products in cart</h3>
       </div>
     </div>
     <!--/ End Shopping Cart -->
